@@ -18,7 +18,7 @@ u8 cache_find(cache *c, u32 address, u8 push) {
     u32 tag = address >> (c->s + c->b);
     u32 set_index;
     if (c->s == 0) set_index = 0;
-    else set_index = (address << (32 - c->b + c->s)) >> (32 - c->s);
+    else set_index = (address << (32 - c->b - c->s)) >> (32 - c->s);
 
     u8 result = set_find(c->sets + set_index, tag, push);
 
