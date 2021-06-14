@@ -1,3 +1,9 @@
+/*
+Bekir Nazmi Görkem - 150118017
+Burak Çağlayan - 150118027
+Rasim Sadıkoğlu - 150118009
+*/
+
 #include "libs.h"
 #include "set.h"
 #include "ram.h"
@@ -10,7 +16,6 @@ const char *const usage = "Usage: ./your_simulator -L1s <L1s> -L1E <L1E> -L1b <L
 // Cache Sizes
 size_t L1s, L1E, L1b, L2s, L2E, L2b;
 const char *trace_name = NULL;
-const char *output_name = NULL;
 const char *ram_name = NULL;
 
 void take_arguments(int argc, const char *argv[]);
@@ -27,18 +32,18 @@ int main(int argc, const char *argv[]) {
 
 void run_tests() {
 
-    ram_image ri = ram_create(ram_name);
-
-    cache L1I = cache_create(L1s, L1E, L1b);
-    cache L1D = cache_create(L1s, L1E, L1b);
-    cache L2 = cache_create(L2s, L2E, L2b);
-
     FILE *trace = fopen(trace_name, "r");
 
     if (trace == NULL) {
         fprintf(stderr, "File does not exist!\n");
         exit(1);
     }
+
+    ram_image ri = ram_create(ram_name);
+
+    cache L1I = cache_create(L1s, L1E, L1b);
+    cache L1D = cache_create(L1s, L1E, L1b);
+    cache L2 = cache_create(L2s, L2E, L2b);
 
     char *buffer = malloc(BUFFER_SIZE);
     while (fgets(buffer, BUFFER_SIZE, trace) != NULL) {
@@ -71,9 +76,10 @@ void run_tests() {
             cache_find(&L2, address, 0);
             ram_write_data(&ri, address, data, size);
         } else {
-            cache_find(&L1D, address, 1);
-            cache_find(&L2, address, 1);
-            L1D.hit++; L2.hit++;
+            u8 result = cache_find(&L1D, address, 1);
+            if (result != 0x4) cache_find(&L2, address, 1);
+            cache_find(&L1D, address, 0);
+            cache_find(&L2, address, 0);
             ram_write_data(&ri, address, data, size);
         }
         if (data != NULL) free(data);
@@ -82,11 +88,9 @@ void run_tests() {
     free(buffer);
     fclose(trace);
 
-    FILE *output_file = output_name == NULL ? NULL : fopen("cache_content.txt", "w");
-    cache_print("L1I", &L1I, output_file, &ri);
-    cache_print("L1D", &L1D, output_file, &ri);
-    cache_print("L2", &L2, output_file, &ri);
-    if (output_file != NULL) fclose(output_file);
+    cache_print("L1I", &L1I, &ri);
+    cache_print("L1D", &L1D, &ri);
+    cache_print("L2", &L2, &ri);
 
     printf("L1I-hits:%10zu     L1I-misses:%10zu     L1I-evictions:%10zu\n", L1I.hit, L1I.miss, L1I.eviction);
     printf("L1D-hits:%10zu     L1D-misses:%10zu     L1D-evictions:%10zu\n", L1D.hit, L1D.miss, L1D.eviction);
@@ -175,15 +179,6 @@ void take_arguments(int argc, const char *argv[]) {
         fprintf(stderr, "Please enter a tracefile!\n%s\n", usage);
         exit(-1);
     }
-
-    // Output Location
-    for (i = 1; i < argc - 1; i++) {
-        if (strcmp("-o", argv[i]) == 0) {
-            output_name = argv[i + 1];
-            break;
-        }
-    }
-    if (output_name == NULL) printf("No output location given, using default. (stdout)\n");
 
     // Ram Location
     for (i = 1; i < argc - 1; i++) {

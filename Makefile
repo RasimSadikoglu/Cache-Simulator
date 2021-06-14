@@ -1,5 +1,5 @@
 CC:=gcc
-FLAGS:=-g -Wall -Wextra -Wpedantic
+FLAGS:=-O3
 OBJS:=main.o set.o ram.o cache.o
 
 main: $(OBJS)
@@ -9,7 +9,7 @@ main: $(OBJS)
 	$(CC) $(FLAGS) -c $< -o $@
 
 run: main
-	./main -L1s 4 -L1E 1 -L1b 4 -L2s 4 -L2E 2 -L2b 4 -t test_large.trace -o cache_content.txt -r RAM.dat
+	./main -L1s 4 -L1E 1 -L1b 4 -L2s 8 -L2E 2 -L2b 4 -t test_large.trace -r RAM.dat
 
 clean:
-	rm -f *.o main
+	rm -f *.o main L1D.txt L1I.txt L2.txt updated_ram.dat

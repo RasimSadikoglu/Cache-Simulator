@@ -35,9 +35,13 @@ u8 cache_find(cache *c, u32 address, u8 push) {
     return result;
 }
 
-void cache_print(const char *name, const cache *c, FILE *output_file, const ram_image *ri) {
+void cache_print(const char *name, const cache *c, const ram_image *ri) {
 
-    if (output_file == NULL) output_file = stdout;
+    char file_name[8];
+    strcpy(file_name, name);
+    strcpy(file_name + strlen(name), ".txt");
+
+    FILE *output_file = fopen(file_name, "w");
 
     size_t S = pow(2, c->s), B = pow(2, c->b);
 
@@ -62,7 +66,7 @@ void cache_print(const char *name, const cache *c, FILE *output_file, const ram_
         printchar(output_file, "=", line_length);
     }
 
-    fprintf(output_file, "\n");
+    fclose(output_file);
     return;
 }
 
