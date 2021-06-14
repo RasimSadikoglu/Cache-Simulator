@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#define printchar(OUT_FILE, CHAR, COUNT) for (int i = 0; i < COUNT; i++) fprintf(OUT_FILE, CHAR); fprintf(OUT_FILE, "\n")
+
 #ifndef _U64
 #define _U64
 #if (ULONG_MAX == 0xFFFFFFFFFFFFFFFF)

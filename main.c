@@ -11,6 +11,7 @@ const char *const usage = "Usage: ./your_simulator -L1s <L1s> -L1E <L1E> -L1b <L
 size_t L1s, L1E, L1b, L2s, L2E, L2b;
 const char *trace_name = NULL;
 const char *output_name = NULL;
+const char *ram_name = NULL;
 
 void take_arguments(int argc, const char *argv[]);
 void run_tests();
@@ -26,7 +27,7 @@ int main(int argc, const char *argv[]) {
 
 void run_tests() {
 
-    ram_image ri = ram_create();
+    ram_image ri = ram_create(ram_name);
 
     cache L1I = cache_create(L1s, L1E, L1b);
     cache L1D = cache_create(L1s, L1E, L1b);
@@ -81,15 +82,15 @@ void run_tests() {
     free(buffer);
     fclose(trace);
 
-    printf("L1I-hits:%10zu     L1I-misses:%10zu     L1I-evictions:%10zu\n", L1I.hit, L1I.miss, L1I.eviction);
-    printf("L1D-hits:%10zu     L1D-misses:%10zu     L1D-evictions:%10zu\n", L1D.hit, L1D.miss, L1D.eviction);
-    printf("L2-hits:%11zu     L2-misses:%11zu     L2-evictions:%11zu\n", L2.hit, L2.miss, L2.eviction);
-
-    FILE *output_file = fopen("cache_content.txt", "w");
+    FILE *output_file = output_name == NULL ? NULL : fopen("cache_content.txt", "w");
     cache_print("L1I", &L1I, output_file, &ri);
     cache_print("L1D", &L1D, output_file, &ri);
     cache_print("L2", &L2, output_file, &ri);
     if (output_file != NULL) fclose(output_file);
+
+    printf("L1I-hits:%10zu     L1I-misses:%10zu     L1I-evictions:%10zu\n", L1I.hit, L1I.miss, L1I.eviction);
+    printf("L1D-hits:%10zu     L1D-misses:%10zu     L1D-evictions:%10zu\n", L1D.hit, L1D.miss, L1D.eviction);
+    printf("L2-hits:%11zu     L2-misses:%11zu     L2-evictions:%11zu\n", L2.hit, L2.miss, L2.eviction);
 
     ram_update(&ri);
     ram_free(&ri);
@@ -123,7 +124,7 @@ void take_arguments(int argc, const char *argv[]) {
     if (i == argc - 1) printf("No size given for 'L1E', using default. (%zu)\n", L1E);
 
     // L1b
-    L1b = 8;
+    L1b = 3;
     for (i = 1; i < argc - 1; i++) {
         if (strcmp("-L1b", argv[i]) == 0) {
             L1b = strtoull(argv[i + 1], NULL, 10);
@@ -153,7 +154,7 @@ void take_arguments(int argc, const char *argv[]) {
     if (i == argc - 1) printf("No size given for 'L2E', using default. (%zu)\n", L2E);
 
     // L2b
-    L2b = 8;
+    L2b = 3;
     for (i = 1; i < argc - 1; i++) {
         if (strcmp("-L2b", argv[i]) == 0) {
             L2b = strtoull(argv[i + 1], NULL, 10);
@@ -181,6 +182,19 @@ void take_arguments(int argc, const char *argv[]) {
             output_name = argv[i + 1];
             break;
         }
+    }
+    if (output_name == NULL) printf("No output location given, using default. (stdout)\n");
+
+    // Ram Location
+    for (i = 1; i < argc - 1; i++) {
+        if (strcmp("-r", argv[i]) == 0) {
+            ram_name = argv[i + 1];
+            break;
+        }
+    }
+    if (ram_name == NULL) {
+        ram_name = "RAM.dat";
+        printf("No ram location given, using default. (RAM.dat)\n");
     }
 
     return;

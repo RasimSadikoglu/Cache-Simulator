@@ -67,33 +67,25 @@ u8 set_find(set *s, u32 tag, u8 push) {
     return 0x2;
 }
 
-void set_print(set *s, size_t index, size_t cs, size_t b, FILE *output_file, const ram_image *ri) {
+int set_print(set *s, size_t index, size_t ss, size_t b, FILE *output_file, const ram_image *ri) {
 
-    int line_length = 19 + pow(2, b + 1);
+    if (s->next == NULL) return 1;
 
-    if (s->next == NULL) {
-        fprintf(output_file, "|");
-        for (int i = 0; i < line_length / 2 - 5; i++) fprintf(output_file, " ");
-        fprintf(output_file, "EMPTY SET");
-        for (int i = 0; i < line_length / 2 - 5; i++) fprintf(output_file, " ");
-        fprintf(output_file, "|\n");
-        return;
-    } 
+    size_t S = pow(2, ss), B = pow(2, b);
+    int index_length = (ss + 3) / 4;
 
     node *current = s->next;
     while (current != NULL) {
-        u32 address = ((current->tag << cs) + index) << b;
-        size_t B = pow(2, b);
+        u32 address = ((current->tag << ss) + index) << b;
 
-        fprintf(output_file, "| 0x%08X | 0x", address);
-        for (size_t i = 0; i < B; i++) {
-            fprintf(output_file, "%02X", ri->data[address + i]);
-        }
+        fprintf(output_file, "| 0x%0*lX | 0x%08X | 0x", index_length, index, current->tag);
+        u8 *data = ram_read_data(ri, address);
+        for (size_t i = 0; i < B; i++) fprintf(output_file, "%02X", data[i]);
         fprintf(output_file, " |\n");
         current = current->next;
     }
 
-    return;
+    return 0;
 }
 
 void set_free(set *s) {

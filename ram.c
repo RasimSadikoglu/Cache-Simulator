@@ -2,9 +2,14 @@
 
 #define BUFFER_SIZE 0x100
 
-ram_image ram_create() {
+ram_image ram_create(const char *ram_name) {
 
-    FILE *ram_file = fopen("RAM.dat", "rb");
+    FILE *ram_file = fopen(ram_name, "rb");
+
+    if (ram_file == NULL) {
+        fprintf(stderr, "File not found!\n");
+        exit(EXIT_FAILURE);
+    }
 
     fseek(ram_file, 0, SEEK_END);
     size_t size = ftell(ram_file);
@@ -15,6 +20,8 @@ ram_image ram_create() {
     ri.data = malloc(size);
 
     fread(ri.data, 1, size, ram_file);
+
+    fclose(ram_file);
 
     return ri;
 }

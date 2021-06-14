@@ -12,7 +12,7 @@ typedef struct {
 
 set set_create(size_t E);
 u8 set_find(set *s, u32 tag, u8 push);
-void set_print(set *s, size_t index, size_t cs, size_t b, FILE *output_file, const ram_image *ri);
+int set_print(set *s, size_t index, size_t ss, size_t b, FILE *output_file, const ram_image *ri);
 void set_free(set *pq);
 
 #endif // SET_H

@@ -1,6 +1,12 @@
 #include "cache.h"
 
 cache cache_create(size_t s, size_t E, size_t b) {
+
+    if (E == 0) {
+        fprintf(stderr, "Cache with size 0, is kinda useless! (E cannot be zero!)\n");
+        exit(EXIT_FAILURE);
+    }
+
     cache c;
     c.miss = 0; c.hit = 0; c.eviction = 0;
     c.s = s; c.E = E; c.b= b;
@@ -30,25 +36,33 @@ u8 cache_find(cache *c, u32 address, u8 push) {
 }
 
 void cache_print(const char *name, const cache *c, FILE *output_file, const ram_image *ri) {
+
     if (output_file == NULL) output_file = stdout;
 
-    int line_length = 19 + pow(2, c->b + 1);
+    size_t S = pow(2, c->s), B = pow(2, c->b);
 
-    fprintf(output_file, "<");
-    for (int i = 0; i < line_length / 2 - strlen(name) / 2 - 1; i++) fprintf(output_file, " ");
-    fprintf(output_file, "%s", name);
-    for (int i = 0; i < line_length / 2 - strlen(name) / 2 - 1 + (strlen(name) % 2 == 0); i++) fprintf(output_file, " ");
-    fprintf(output_file, ">\n");
+    int name_length = strlen(name);
 
-    size_t S = pow(2, c->s);
+    int set_index_length = (c->s + 3) / 4 + 4 + (c->s == 0);
+    int tag_length = 12;
+    int data_length = B * 2 + 4;
+    int line_length = set_index_length + tag_length + data_length + 4;
+
+    int a1 = (line_length - 2 - name_length);
+
+    fprintf(output_file, "<%*s%s%*s>\n", a1 / 2, "", name, (a1 + 1) / 2, "");
+    fprintf(output_file, "| %-*s| %-*s| %-*s|\n", set_index_length - 1, "Set", tag_length - 1, "Tag", data_length - 1, "Data");
+    printchar(output_file, "=", line_length);
+
     for (size_t i = 0; i < S; i++) {
-        for (int i = 0; i < line_length; i++) fprintf(output_file, "=");
-        fprintf(output_file, "\n");
-        set_print(c->sets + i, i, c->s, c->b, output_file, ri);
+        if(set_print(c->sets + i, i, c->s, c->b, output_file, ri)) {
+            a1 = line_length - 11;
+            fprintf(output_file, "|%*s%s%*s|\n", a1 / 2, "", "EMPTY SET", (a1 + 1) / 2, "");
+        }
+        printchar(output_file, "=", line_length);
     }
-    for (int i = 0; i < 19 + pow(2, c->b + 1); i++) fprintf(output_file, "=");
-    fprintf(output_file, "\n\n\n");
 
+    fprintf(output_file, "\n");
     return;
 }
 
