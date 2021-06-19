@@ -1,9 +1,3 @@
-/*
-Bekir Nazmi Görkem - 150118017
-Burak Çağlayan - 150118027
-Rasim Sadıkoğlu - 150118009
-*/
-
 #include "libs.h"
 #include "set.h"
 #include "ram.h"
