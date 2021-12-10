@@ -1,4 +1,4 @@
-#include "ram.h"
+#include "../include/ram.h"
 
 #define BUFFER_SIZE 0x100
 
@@ -48,7 +48,7 @@ void ram_write_data(ram_image *ri, size_t address, u8 *data, size_t size_of_data
 
 void ram_update(const ram_image *ri) {
 
-    FILE *ram_file = fopen("updated_ram.dat", "wb");
+    FILE *ram_file = fopen("rams/updated_ram.dat", "wb");
 
     fwrite(ri->data, 1, ri->size, ram_file);
 

@@ -1,7 +1,7 @@
-#include "libs.h"
-#include "set.h"
-#include "ram.h"
-#include "cache.h"
+#include "../include/libs.h"
+#include "../include/set.h"
+#include "../include/ram.h"
+#include "../include/cache.h"
 
 #define BUFFER_SIZE 100
 

@@ -1,4 +1,4 @@
-#include "cache.h"
+#include "../include/cache.h"
 
 cache cache_create(size_t s, size_t E, size_t b) {
 
@@ -37,9 +37,8 @@ u8 cache_find(cache *c, u32 address, u8 push) {
 
 void cache_print(const char *name, const cache *c, const ram_image *ri) {
 
-    char file_name[8];
-    strcpy(file_name, name);
-    strcpy(file_name + strlen(name), ".txt");
+    char file_name[100];
+    sprintf(file_name, "output/%s.txt", name);
 
     FILE *output_file = fopen(file_name, "w");
 
