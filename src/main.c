@@ -2,22 +2,25 @@
 #include "../include/set.h"
 #include "../include/ram.h"
 #include "../include/cache.h"
+#include "../include/pargser.h"
 
 #define BUFFER_SIZE 100
 
-const char *const usage = "Usage: ./your_simulator -L1s <L1s> -L1E <L1E> -L1b <L1b> -L2s <L2s> -L2E <L2E> -L2b <L2b> -t <tracefile>";
+static const char *const usage = "Usage: ./your_simulator -L1s <L1s> -L1E <L1E> -L1b <L1b> -L2s <L2s> -L2E <L2E> -L2b <L2b> -t <tracefile>";
 
 // Cache Sizes
-size_t L1s, L1E, L1b, L2s, L2E, L2b;
-const char *trace_name = NULL;
-const char *ram_name = NULL;
+static int L1s, L1E, L1b, L2s, L2E, L2b;
+static const char *trace_name = NULL;
+static const char *ram_name = NULL;
 
 void take_arguments(int argc, const char *argv[]);
 void run_tests();
 
-int main(int argc, const char *argv[]) {
+int main(int argc, char *argv[]) {
 
-    take_arguments(argc, argv);
+    pargser(argc, argv, 
+        "-L1s%d-L1E%d-L1b%d-L2s%d-L2E%d-L2b%d-t%*-r%*",
+        &L1s, &L1E, &L1b, &L2s, &L2E, &L2b, &trace_name, &ram_name);
 
     run_tests();
 
@@ -95,96 +98,6 @@ void run_tests() {
     cache_free(&L1I);
     cache_free(&L1D);
     cache_free(&L2);
-
-    return;
-}
-
-void take_arguments(int argc, const char *argv[]) {
-    int i;
-    // L1s
-    L1s = 0;
-    for (i = 1; i < argc - 1; i++) {
-        if (strcmp("-L1s", argv[i]) == 0) {
-            L1s = strtoull(argv[i + 1], NULL, 10);
-            break;
-        }
-    }
-    if (i == argc - 1) printf("No size given for 'L1s', using default. (%zu)\n", L1s);
-
-    // L1E
-    L1E = 1;
-    for (i = 1; i < argc - 1; i++) {
-        if (strcmp("-L1E", argv[i]) == 0) {
-            L1E = strtoull(argv[i + 1], NULL, 10);
-            break;
-        }
-    }
-    if (i == argc - 1) printf("No size given for 'L1E', using default. (%zu)\n", L1E);
-
-    // L1b
-    L1b = 3;
-    for (i = 1; i < argc - 1; i++) {
-        if (strcmp("-L1b", argv[i]) == 0) {
-            L1b = strtoull(argv[i + 1], NULL, 10);
-            break;
-        }
-    }
-    if (i == argc - 1) printf("No size given for 'L1b', using default. (%zu)\n", L1b);
-
-    // L2s
-    L2s = 0;
-    for (i = 1; i < argc - 1; i++) {
-        if (strcmp("-L2s", argv[i]) == 0) {
-            L2s = strtoull(argv[i + 1], NULL, 10);
-            break;
-        }
-    }
-    if (i == argc - 1) printf("No size given for 'L2s', using default. (%zu)\n", L2s);
-
-    // L2E
-    L2E = 1;
-    for (i = 1; i < argc - 1; i++) {
-        if (strcmp("-L2E", argv[i]) == 0) {
-            L2E = strtoull(argv[i + 1], NULL, 10);
-            break;
-        }
-    }
-    if (i == argc - 1) printf("No size given for 'L2E', using default. (%zu)\n", L2E);
-
-    // L2b
-    L2b = 3;
-    for (i = 1; i < argc - 1; i++) {
-        if (strcmp("-L2b", argv[i]) == 0) {
-            L2b = strtoull(argv[i + 1], NULL, 10);
-            break;
-        }
-    }
-    if (i == argc - 1) printf("No size given for 'L2b', using default. (%zu)\n", L2b);
-
-    // trace
-    for (i = 1; i < argc - 1; i++) {
-        if (strcmp("-t", argv[i]) == 0) {
-            trace_name = argv[i + 1];
-            break;
-        }
-    }
-
-    if (trace_name == NULL) {
-        fprintf(stderr, "Please enter a tracefile!\n%s\n", usage);
-        exit(-1);
-    }
-
-    // Ram Location
-    for (i = 1; i < argc - 1; i++) {
-        if (strcmp("-r", argv[i]) == 0) {
-            ram_name = argv[i + 1];
-            break;
-        }
-    }
-    if (ram_name == NULL) {
-        ram_name = "RAM.dat";
-        printf("No ram location given, using default. (RAM.dat)\n");
-    }
 
     return;
 }
